@@ -1,0 +1,37 @@
+version: '2'
+services:
+  volume:
+    image: alpine:latest
+    entrypoint: /bin/true
+    volumes:
+      - ./etc/rundeck:/etc/rundeck
+      - ./var/rundeck:/var/rundeck
+      - ./var/lib/rundeck/.ssh:/var/lib/rundeck/.ssh
+      - ./var/lib/rundeck/logs:/var/lib/rundeck/logs
+      - ./var/lib/rundeck/var/storage:/var/lib/rundeck/var/storage
+      - ./var/lib/mysql:/var/lib/mysql
+      - ./var/log/rundeck:/var/log/rundeck
+      - ./opt/rundeck-plugins:/opt/rundeck-plugins
+  rundeck:
+    image: jordan/rundeck:latest
+    volumes_from:
+      - volume
+    environment:
+      LANG: ja_JP.UTF-8
+      TZ: Asia/Tokyo
+      RDECK_JVM: -Dfile.encoding=UTF-8 -Duser.timezone=Asia/Tokyo
+      SERVER_URL: http://127.0.0.1:4440
+      RUNDECK_ADMIN_PASSWORD: admin
+    ports:
+      - 4440:4440
+    links:
+      - rundeck-node01
+  rundeck-node01:
+    build: ./rundeck-nodes
+    environment:
+      LANG: ja_JP.UTF-8
+      TZ: Asia/Tokyo
+    ports:
+      - 22
+    volumes_from:
+      - volume
